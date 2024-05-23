@@ -458,7 +458,8 @@ class LightningPretrainSpconv(pl.LightningModule):
         r = self.model_points(batch["voxels"], batch["coordinates"])
         output_points, output_points_class_level = r[0], r[1]
         output_points = interpolate_from_bev_features(batch["pc"], output_points, self.batch_size, self.model_points.bev_stride)
-        sparse_input = ME.SparseTensor(batch["sinput_F"], batch["sinput_C"])
+        output_points_class_level = interpolate_from_bev_features(batch["pc"], output_points_class_level, self.batch_size, self.model_points.bev_stride)
+        # sparse_input = ME.SparseTensor(batch["sinput_F"], batch["sinput_C"])
         self.model_images.eval()
         self.model_images.decoder.train()
         output_images, output_images_class_level = self.model_images(batch["input_I"])        
