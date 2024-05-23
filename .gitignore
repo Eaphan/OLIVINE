@@ -1,0 +1,16 @@
+datasets
+superpixels
+.vscode
+data
+output
+outputs
+**/__pycache__
+*.pyc
+**/.ipynb_checkpoints
+downstream/results
+checkpoints/
+*.pt
+tmp*
+logs
+*.log
+*.pth
