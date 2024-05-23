@@ -16,7 +16,7 @@ num_epochs : 50
 dropout : 0.
 # number of GPUs and CPU threads to use
 num_gpus : 4
-num_threads :4
+num_threads : 4
 kernel_size : 3
 model_n_out : 64
 bn_momentum : 0.05
