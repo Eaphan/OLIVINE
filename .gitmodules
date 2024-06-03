@@ -1,0 +1,3 @@
+[submodule "Grounded-SAM"]
+	path = Grounded-SAM
+	url = git@github.com:Eaphan/Grounded-SAM.git
