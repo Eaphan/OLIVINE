@@ -150,8 +150,8 @@ class NuScenesDataset(Dataset):
                     # Add new scans in the list
                     self.list_tokens.extend(list_data)
 
-        if phase in ("val", "verifying"):
-            self.list_tokens = self.list_tokens[::50]
+        #if phase in ("val", "verifying"):
+        #    self.list_tokens = self.list_tokens[::50]
 
         # labels' names lookup table
         self.eval_labels = {
