@@ -2,20 +2,9 @@
 
 Official PyTorch implementation of the method **OLIVINE**. More details can be found in the paper:
 
-**Image-to-Lidar Self-Supervised Distillation for Autonomous Driving Data**, under review , by xxx authors.
-![Overview of the method](./assets/method.png)
+**Image-to-Lidar Self-Supervised Distillation for Autonomous Driving Data**, under review. [[arXiv](https://arxiv.org/abs/2405.14271)]
 
-<!-- If you use SLidR in your research, please consider citing:
-```
-@InProceedings{SLidR,
-    author    = {Sautier, Corentin and Puy, Gilles and Gidaris, Spyros and Boulch, Alexandre and Bursuc, Andrei and Marlet, Renaud},
-    title     = {Image-to-Lidar Self-Supervised Distillation for Autonomous Driving Data},
-    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-    month     = {June},
-    year      = {2022},
-    pages     = {9891-9901}
-}
-``` -->
+![Overview of the method](./assets/method.png)
 
 
 ## Dependencies
@@ -59,7 +48,7 @@ We will release the pre-trained models in the future. -->
 ### Predict the weak semantic labels (required)
 
 <!-- Before launching the pre-training, you first need to compute all superpixels on nuScenes, this can take several hours. You can either compute superpixels for the Minkowski SR-UNet (minkunet) or the voxelnet backbones. The first is adapted for semantic segmentation and the second for object detection. -->
-First we use the Grounded-SAM to obtain weak semantic labels of RGB images. The tools can be found in [link](https://github.com/IDEA-Research/Grounded-Segment-Anything). We will further refine the introduction to this point after the deadline.
+First we use the [Grounded-SAM](https://github.com/IDEA-Research/Grounded-Segment-Anything) to obtain weak semantic labels of RGB images. The script for prediction can be found in [here](Grounded-SAM/infer.sh). Please install Grounded-SAM follow the [instruction](Grounded-SAM/README.md) before running the script.
 
 ### Pre-training a 3D backbone
 
@@ -70,6 +59,8 @@ To launch a pre-training of the Minkowski SR-UNet (minkunet) on nuScenes:
 You can alternatively replace minkunet with voxelnet to pre-train a PV-RCNN backbone.  
 Weights of the pre-training can be found in the output folder, and can be re-used during a downstream task.
 If you wish to use multiple GPUs, please scale the learning rate and batch size accordingly.
+
+**TIPs:** The pre-trained weights in the final epoch of pre-training may not always be the best; it's worth considering saving the weights from other rounds, such as the 40th epoch.
 
 ### Semantic segmentation
 
@@ -162,3 +153,14 @@ Computation of the lovasz loss used in semantic segmentation follows the code of
 
 ## License
 OLIVINE is released under the [Apache 2.0 license](./LICENSE).
+
+## Citation
+If you use OLIVINE useful in your research, please consider citing:
+```
+@article{zhang2024fine,
+    title={Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models},
+    author={Zhang, Yifan and Hou, Junhui},
+    journal={arXiv preprint arXiv:2405.14271},
+    year={2024}
+}
+```
