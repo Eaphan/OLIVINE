@@ -50,6 +50,8 @@ We will release the pre-trained models in the future. -->
 <!-- Before launching the pre-training, you first need to compute all superpixels on nuScenes, this can take several hours. You can either compute superpixels for the Minkowski SR-UNet (minkunet) or the voxelnet backbones. The first is adapted for semantic segmentation and the second for object detection. -->
 First we use the [Grounded-SAM](https://github.com/IDEA-Research/Grounded-Segment-Anything) to obtain weak semantic labels of RGB images. The script for prediction can be found in [here](Grounded-SAM/infer.sh). Please install Grounded-SAM follow the [instruction](Grounded-SAM/README.md) before running the script.
 
+You can also obtain the labels by directly downloading the files we provide in [Baidu netdisk](https://pan.baidu.com/s/1CNQRCawQuL5eNFQqTXMwlw?pwd=1jkr).
+
 ### Pre-training a 3D backbone
 
 To launch a pre-training of the Minkowski SR-UNet (minkunet) on nuScenes:
