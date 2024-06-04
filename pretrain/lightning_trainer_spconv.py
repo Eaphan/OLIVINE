@@ -216,7 +216,9 @@ class VMFDistribution(nn.Module):
         mu = self.mu / self.mu.norm(dim=-1, keepdim=True)
         mu = mu.detach()
         kappa = self.kappa.detach()
-        log_bessel_func_result = kappa - torch.log(torch.sqrt(2 * torch.pi * kappa) * (1 + 1/(8*kappa) + 9/(128*kappa**2)))
+        # log_bessel_func_result = kappa - torch.log(torch.sqrt(2 * torch.pi * kappa) * (1 + 1/(8*kappa) + 9/(128*kappa**2)))
+        bessel_func_result = self.modified_bessel_first_kind()
+        log_bessel_func_result = torch.log(bessel_func_result)
         log_C_p = (self.p/2 - 1) * torch.log(kappa) - self.p/2 * torch.log(torch.tensor(2 * torch.pi)) - log_bessel_func_result
         dot_prod = kappa * (x @ mu)
         kl_divergence = - log_C_p - dot_prod.mean()
@@ -302,54 +304,32 @@ class LightningPretrainSpconv(pl.LightningModule):
         loss = torch.mean(torch.stack(losses))
 
         kl_loss = 0
+        decay = 0.0001
+        kl_loss_list = []
         for c_idx in range(self.sup_class_num):
             c_mask = batch["pairing_labels"] == c_idx
 
-            # if c_mask.sum() == 0:
-            #     continue
-            # if not self.vmf_distributions[c_idx].mu_init:
-            #     self.vmf_distributions[c_idx].mu = nn.Parameter(pc_feas[c_mask].mean(0).clone())
-            #     self.vmf_distributions[c_idx].mu_init = True
-            # kl_loss_c = self.vmf_distributions[c_idx].kl_divergence_stopx(pc_feas[c_mask]) + 0.1 * self.vmf_distributions[c_idx].kl_divergence_stopvmf(pc_feas[c_mask])
-            # kl_loss_list.append(kl_loss_c)
+            if self.global_step <= 1 / decay:
+                if c_mask.sum() != 0:
+                    self.vmf_distributions[c_idx].z_mean.data = (1 - decay) * self.vmf_distributions[c_idx].z_mean.data +  decay * pc_feas[c_mask].mean(0).clone()
+                # dist.all_reduce(self.vmf_distributions[c_idx].z_mean.data, op=dist.ReduceOp.SUM)
+                # self.vmf_distributions[c_idx].z_mean.data /= dist.get_world_size()
+                z_mean_norm = self.vmf_distributions[c_idx].z_mean.data.norm()
+                self.vmf_distributions[c_idx].mu.data = self.vmf_distributions[c_idx].z_mean.data / z_mean_norm
+                self.vmf_distributions[c_idx].kappa.data = z_mean_norm * (self.vmf_distributions[c_idx].p - z_mean_norm ** 2) / (1 - z_mean_norm ** 2)
+            else:
+                if c_mask.sum() != 0:
+                    kl_loss_c = self.vmf_distributions[c_idx].kl_divergence_stopvmf(pc_feas[c_mask])
+                    kl_loss_list.append(kl_loss_c)
 
-            # update vMF parameters
-            decay = 0.0001
-            if c_mask.sum() != 0:
-                self.vmf_distributions[c_idx].z_mean.data = (1 - decay) * self.vmf_distributions[c_idx].z_mean.data +  decay * pc_feas[c_mask].mean(0).clone()
+        if self.global_step > 1 / decay:
+            kl_loss = torch.mean(torch.stack(kl_loss_list))
 
-            dist.all_reduce(self.vmf_distributions[c_idx].z_mean.data, op=dist.ReduceOp.SUM)
-            # pl.metrics.functional.reduction.reduce(self.vmf_distributions[c_idx].z_mean.data, 'sum')
-            # pl.strategies.DataParallelStrategy.reduce(self.vmf_distributions[c_idx].z_mean.data, 'sum')
-            self.vmf_distributions[c_idx].z_mean.data /= dist.get_world_size()
-
-            z_mean_norm = self.vmf_distributions[c_idx].z_mean.data.norm()
-            self.vmf_distributions[c_idx].mu.data = self.vmf_distributions[c_idx].z_mean.data / z_mean_norm
-            # print("### z_mean_norm = ", z_mean_norm.item())
-            self.vmf_distributions[c_idx].kappa.data = z_mean_norm * (self.vmf_distributions[c_idx].p - z_mean_norm ** 2) / (1 - z_mean_norm ** 2)
-
-            if c_mask.sum() != 0:
-                kl_loss_c = self.vmf_distributions[c_idx].kl_divergence_stopvmf(pc_feas[c_mask])
-                kl_loss += kl_loss_c * (c_mask.sum() / len(c_mask))
         self.log("cl_loss", loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
+        # self.log("kappa_0", self.vmf_distributions[0].kappa.item(), on_step=True, on_epoch=False, prog_bar=True, logger=True)
         self.log("kl_loss", kl_loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        self.log("kappa_0", self.vmf_distributions[0].kappa.item(), on_step=True, on_epoch=False, prog_bar=True, logger=True)
 
-        # l2_func = nn.MSELoss()
-        # loss_reg = 0
-        # for c_i in range(self.sup_class_num):
-        #     mu_norm_i = self.vmf_distributions[c_i].mu / self.vmf_distributions[c_i].mu.norm()
-        #     for c_j in range(c_i+1, self.sup_class_num):
-        #         mu_norm_j = self.vmf_distributions[c_j].mu / self.vmf_distributions[c_j].mu.norm()
-                # loss_reg_ = - l2_func(mu_norm_i, mu_norm_j)
-                # loss_reg_ = mu_norm_i @ mu_norm_j
-                # loss_reg = loss_reg + loss_reg_
-            # print(c_i, c_j, mu_norm_i @ mu_norm_j)
-        # self.log("loss_reg", loss_reg, on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        # loss = loss + 0.01 * kl_loss + loss_reg
-        # print("### ori loss", loss.item())
-        if self.global_step >= 1 / decay:
-            loss = loss + 0.1 * kl_loss
+        loss = loss + kl_loss
 
         torch.cuda.empty_cache()
         self.log(

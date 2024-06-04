@@ -63,7 +63,7 @@ def main():
         plugins=DDPPlugin(find_unused_parameters=True),
         num_sanity_val_steps=0,
         resume_from_checkpoint=config["resume_path"],
-        check_val_every_n_epoch=1,
+        check_val_every_n_epoch=10,
     )
     print("Starting the training")
     trainer.fit(module, dm)
