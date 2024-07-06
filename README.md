@@ -52,7 +52,7 @@ First we use the [Grounded-SAM](https://github.com/IDEA-Research/Grounded-Segmen
 
 ``` git submodule update --init ``` 
 
-Then, the script for prediction can be found in [Grounded-SAM/infer.sh](Grounded-SAM/infer.sh). Please install Grounded-SAM follow the [instruction](Grounded-SAM/README.md) before running the script.
+Then, the script for the prediction can be found in Grounded-SAM/infer.sh. Please install Grounded-SAM following the instructions (see Grounded-SAM/README.md) before running the script.
 
 You can also obtain the labels by directly downloading the files we provide in [Baidu netdisk](https://pan.baidu.com/s/1CNQRCawQuL5eNFQqTXMwlw?pwd=1jkr) or [Google Drive](https://drive.google.com/file/d/1FGow9PFoH11M-g_eUg-7ZGZdT_8pUt4j/view?usp=drive_link).
 
