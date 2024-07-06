@@ -2,7 +2,7 @@
 
 Official PyTorch implementation of the method **OLIVINE**. More details can be found in the paper:
 
-**Image-to-Lidar Self-Supervised Distillation for Autonomous Driving Data**, under review. [[arXiv](https://arxiv.org/abs/2405.14271)]
+**Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models**, under review. [[arXiv](https://arxiv.org/abs/2405.14271)]
 
 ![Overview of the method](./assets/method.png)
 
