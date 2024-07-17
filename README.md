@@ -33,11 +33,10 @@ datasets/
         └── sequences
 ```
 
-<!-- ## Pre-trained models
-We will release the pre-trained models in the future. -->
-<!-- ### Minkowski SR-UNet
-[SR-UNet pre-trained on nuScenes](#) (to release)
+## Pre-trained models
+Minkowski SR-UNet pre-trained on nuScenes: [Link](https://drive.google.com/file/d/1gMzwFymKkSi5WqeEL8Ie9L8N6qTcli2u/view?usp=sharing).
 
+<!--
 ### SPconv VoxelNet
 [VoxelNet pre-trained on nuScenes](#) (to release)
 
