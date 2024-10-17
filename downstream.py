@@ -11,7 +11,12 @@ from downstream.lightning_trainer import LightningDownstream
 from downstream.lightning_datamodule import DownstreamDataModule
 from downstream.dataloader_kitti import make_data_loader as make_data_loader_kitti
 from downstream.dataloader_nuscenes import make_data_loader as make_data_loader_nuscenes
-
+from downstream.dataloader_scribble_kitti import make_data_loader as make_data_loader_scribble_kitti
+from downstream.dataloader_rellis3d import make_data_loader as make_data_loader_rellis3d
+# from downstream.dataloader_semanticposs import make_data_loader as make_data_loader_semanticposs
+from downstream.dataloader_semanticstf import make_data_loader as make_data_loader_semanticstf
+# from downstream.dataloader_synlidar import make_data_loader as make_data_loader_synlidar
+from downstream.dataloader_daps3d import make_data_loader as make_data_loader_daps3d
 
 def main():
     """
@@ -72,6 +77,30 @@ def main():
         val_dataloader = make_data_loader_kitti(
             config, "val", num_threads=config["num_threads"]
         )
+    elif config["dataset"].lower() == "scribble_kitti":
+        val_dataloader = make_data_loader_scribble_kitti(
+            config, "val", num_threads=config["num_threads"]
+        )        
+    elif config["dataset"].lower() == "rellis3d":
+        val_dataloader = make_data_loader_rellis3d(
+            config, "val", num_threads=config["num_threads"]
+        )      
+    # elif config["dataset"].lower() in ["semantic_poss", "semanticposs"]:
+    #     val_dataloader = make_data_loader_semanticposs(
+    #         config, "val", num_threads=config["num_threads"]
+    #     )
+    elif config["dataset"].lower() in ["semantic_stf", "semanticstf"]:
+        val_dataloader = make_data_loader_semanticstf(
+            config, "val", num_threads=config["num_threads"]
+        )    
+    # elif config["dataset"].lower() in ["synlidar"]:
+    #     val_dataloader = make_data_loader_synlidar(
+    #         config, "val", num_threads=config["num_threads"]
+    #     )
+    elif config["dataset"].lower() in ["daps3d"]:
+        val_dataloader = make_data_loader_daps3d(
+            config, "val", num_threads=config["num_threads"]
+        )          
     evaluate(model.to(0), val_dataloader, config)
 
 

@@ -7,9 +7,10 @@ from MinkowskiEngine.utils import sparse_quantize
 from utils.transforms import make_transforms_clouds
 
 
-TRAIN_SET = {0, 1, 2, 3, 4, 5, 6, 7, 9, 10}
-VALIDATION_SET = {8}
-TEST_SET = {11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+# TRAIN_SET = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10"}
+TRAIN_SET = {"38-18_7_72_90"}
+VALIDATION_SET = {"38-18_7_72_90", "42-48_10_78_90", "44-18_11_15_32"}
+TEST_SET = {}
 
 
 def custom_collate_fn(list_data):
@@ -56,7 +57,7 @@ def custom_collate_fn(list_data):
         }
 
 
-class SemanticKITTIDataset(Dataset):
+class DAPS3DDataset(Dataset):
     """
     Dataset returning a lidar scene and associated labels.
     Note that superpixels fonctionality have been removed.
@@ -81,36 +82,37 @@ class SemanticKITTIDataset(Dataset):
 
         if phase in ("train", "parametrizing"):
             phase_set = TRAIN_SET
+            sub_dir = "DAPS-2"
         elif phase in ("val", "verifying"):
             phase_set = VALIDATION_SET
+            sub_dir = "DAPS-2"
         elif phase == "test":
             phase_set = TEST_SET
+
 
         self.list_files = []
         for num in phase_set:
             directory = next(
                 os.walk(
-                    f"datasets/semantic_kitti/dataset/sequences/{num:0>2d}/velodyne"
+                    f"datasets/daps3d/{sub_dir}/data/{num}/clouds"
                 )
             )
             self.list_files.extend(
                 map(
-                    lambda x: f"datasets/semantic_kitti/dataset/sequences/"
-                    f"{num:0>2d}/velodyne/" + x,
+                    lambda x: f"datasets/daps3d/{sub_dir}/data/"
+                    f"{num}/clouds/" + x,
                     directory[2],
                 )
             )
+
         self.list_files = sorted(self.list_files)[::skip_ratio]
         # if phase in ("val", "verifying"):
         #     self.list_files = self.list_files[::10]
 
         # labels' names lookup table
-        self.eval_labels = {
-            0: 0, 1: 0, 10: 1, 11: 2, 13: 5, 15: 3, 16: 5, 18: 4, 20: 5, 30: 6, 31: 7,
-            32: 8, 40: 9, 44: 10, 48: 11, 49: 12, 50: 13, 51: 14, 52: 0, 60: 9, 70: 15,
-            71: 16, 72: 17, 80: 18, 81: 19, 99: 0, 252: 1, 253: 7, 254: 6, 255: 8,
-            256: 5, 257: 5, 258: 4, 259: 5,
-        }
+        self.eval_labels = {0: 0, 1: 0, 10: 1, 11: 1, 13: 1, 15: 1, 16: 1, 18: 1, 20: 1, 30: 2,
+         31: 2, 32: 2, 40: 3, 44: 3, 48: 3, 49: 3, 50: 4, 51: 4, 52: 0, 60: 3, 70: 4, 71: 4,
+          72: 3, 80: 4, 81: 4, 99: 0, 252: 1, 253: 2, 254: 2, 255: 2, 256: 1, 257: 1, 258: 1, 259: 1}
 
     def __len__(self):
         return len(self.list_files)
@@ -122,7 +124,7 @@ class SemanticKITTIDataset(Dataset):
         pc = points[:, :3]
         if self.labels:
             lidarseg_labels_filename = re.sub(
-                "bin", "label", re.sub("velodyne", "labels", lidar_file)
+                "bin", "label", re.sub("clouds", "labels", lidar_file)
             )
             points_labels = (
                 np.fromfile(lidarseg_labels_filename, dtype=np.uint32) & 0xFFFF
@@ -149,7 +151,7 @@ class SemanticKITTIDataset(Dataset):
         discrete_coords, indexes, inverse_indexes = sparse_quantize(
             coords_aug, return_index=True, return_inverse=True
         )
-        unique_feats = torch.tensor(points[indexes][:, 3:] + 1.)
+        unique_feats = torch.tensor(points[indexes][:, 3:])
 
         if self.labels:
             points_labels = torch.tensor(
@@ -182,7 +184,7 @@ def make_data_loader(config, phase, num_threads=0):
         transforms = None
 
     # instantiate the dataset
-    dset = SemanticKITTIDataset(phase=phase, transforms=transforms, config=config)
+    dset = DAPS3DDataset(phase=phase, transforms=transforms, config=config)
     collate_fn = custom_collate_fn
     batch_size = config["batch_size"] // config["num_gpus"]
 
@@ -196,7 +198,7 @@ def make_data_loader(config, phase, num_threads=0):
         collate_fn=collate_fn,
         pin_memory=False,
         # sampler=sampler,
-        drop_last=phase == "train",
+        drop_last=False,
         worker_init_fn=lambda id: np.random.seed(torch.initial_seed() // 2 ** 32 + id),
     )
     return loader

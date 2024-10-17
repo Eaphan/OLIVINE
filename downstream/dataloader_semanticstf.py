@@ -7,9 +7,9 @@ from MinkowskiEngine.utils import sparse_quantize
 from utils.transforms import make_transforms_clouds
 
 
-TRAIN_SET = {0, 1, 2, 3, 4, 5, 6, 7, 9, 10}
-VALIDATION_SET = {8}
-TEST_SET = {11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+# TRAIN_SET = {0, 1, 2, 3, 4, 5, 6, 7, 9, 10}
+# VALIDATION_SET = {8}
+# TEST_SET = {11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
 
 def custom_collate_fn(list_data):
@@ -56,7 +56,7 @@ def custom_collate_fn(list_data):
         }
 
 
-class SemanticKITTIDataset(Dataset):
+class SemanticSTFDataset(Dataset):
     """
     Dataset returning a lidar scene and associated labels.
     Note that superpixels fonctionality have been removed.
@@ -80,23 +80,24 @@ class SemanticKITTIDataset(Dataset):
             skip_ratio = 1
 
         if phase in ("train", "parametrizing"):
-            phase_set = TRAIN_SET
+            phase_set = ['train']
         elif phase in ("val", "verifying"):
-            phase_set = VALIDATION_SET
+            phase_set = ['val']
         elif phase == "test":
-            phase_set = TEST_SET
+            phase_set = ['test']
 
         self.list_files = []
         for num in phase_set:
+            print('###', num)
             directory = next(
                 os.walk(
-                    f"datasets/semantic_kitti/dataset/sequences/{num:0>2d}/velodyne"
+                    f"datasets/semanticstf/{num}/velodyne"
                 )
             )
             self.list_files.extend(
                 map(
-                    lambda x: f"datasets/semantic_kitti/dataset/sequences/"
-                    f"{num:0>2d}/velodyne/" + x,
+                    lambda x: f"datasets/semanticstf/"
+                    f"{num}/velodyne/" + x,
                     directory[2],
                 )
             )
@@ -105,19 +106,35 @@ class SemanticKITTIDataset(Dataset):
         #     self.list_files = self.list_files[::10]
 
         # labels' names lookup table
-        self.eval_labels = {
-            0: 0, 1: 0, 10: 1, 11: 2, 13: 5, 15: 3, 16: 5, 18: 4, 20: 5, 30: 6, 31: 7,
-            32: 8, 40: 9, 44: 10, 48: 11, 49: 12, 50: 13, 51: 14, 52: 0, 60: 9, 70: 15,
-            71: 16, 72: 17, 80: 18, 81: 19, 99: 0, 252: 1, 253: 7, 254: 6, 255: 8,
-            256: 5, 257: 5, 258: 4, 259: 5,
+        learning_map = {
+            0: 0,
+            4: 1,
+            5: 1,
+            6: 2,
+            7: 3,
+            8: 4,
+            9: 5,
+            10: 6,
+            11: 6,
+            12: 6,
+            13: 7,
+            14: 8,
+            15: 9,
+            16: 10,
+            17: 11,
+            21: 12,
+            22: 13,
         }
+        self.eval_labels = np.zeros((np.max([k for k in learning_map.keys()]) + 1), dtype=np.int32)
+        for k, v in learning_map.items():
+            self.eval_labels[k] = v
 
     def __len__(self):
         return len(self.list_files)
 
     def __getitem__(self, idx):
         lidar_file = self.list_files[idx]
-        points = np.fromfile(lidar_file, dtype=np.float32).reshape((-1, 4))
+        points = np.fromfile(lidar_file, dtype=np.float32).reshape(-1, 5)[:, :4]
         # get the points (4th coordinate is the point intensity)
         pc = points[:, :3]
         if self.labels:
@@ -182,7 +199,7 @@ def make_data_loader(config, phase, num_threads=0):
         transforms = None
 
     # instantiate the dataset
-    dset = SemanticKITTIDataset(phase=phase, transforms=transforms, config=config)
+    dset = ScribbleKITTIDataset(phase=phase, transforms=transforms, config=config)
     collate_fn = custom_collate_fn
     batch_size = config["batch_size"] // config["num_gpus"]
 

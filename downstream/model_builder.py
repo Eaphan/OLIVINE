@@ -50,7 +50,8 @@ def make_model(config, load_path=None):
         print("Training with pretrained model")
         checkpoint = torch.load(load_path, map_location="cpu")
         if "config" in checkpoint:
-            for cfg in ("voxel_size", "cylindrical_coordinates"):
+            # for cfg in ("voxel_size", "cylindrical_coordinates"):
+            for cfg in ("voxel_size", ):
                 assert checkpoint["config"][cfg] == config[cfg], (
                     f"{cfg} is not consistant. "
                     f"Checkpoint: {checkpoint['config'][cfg]}, "

@@ -168,7 +168,7 @@ class LightningPretrain(pl.LightningModule):
         self.model_points = model_points
         self.model_images = model_images
 
-        self.sup_class_num = 14 # ad hoc
+        self.sup_class_num = 17 # ad hoc
         self.vmf_distributions = nn.ModuleList([VMFDistribution(64) for i in range(self.sup_class_num)])
 
         self._config = config
@@ -244,8 +244,8 @@ class LightningPretrain(pl.LightningModule):
             if self.global_step <= 1 / decay:
                 if c_mask.sum() != 0:
                     self.vmf_distributions[c_idx].z_mean.data = (1 - decay) * self.vmf_distributions[c_idx].z_mean.data +  decay * pc_feas[c_mask].mean(0).clone()
-                # dist.all_reduce(self.vmf_distributions[c_idx].z_mean.data, op=dist.ReduceOp.SUM)
-                # self.vmf_distributions[c_idx].z_mean.data /= dist.get_world_size()
+                dist.all_reduce(self.vmf_distributions[c_idx].z_mean.data, op=dist.ReduceOp.SUM)
+                self.vmf_distributions[c_idx].z_mean.data /= dist.get_world_size()
                 z_mean_norm = self.vmf_distributions[c_idx].z_mean.data.norm()
                 self.vmf_distributions[c_idx].mu.data = self.vmf_distributions[c_idx].z_mean.data / z_mean_norm
                 self.vmf_distributions[c_idx].kappa.data = z_mean_norm * (self.vmf_distributions[c_idx].p - z_mean_norm ** 2) / (1 - z_mean_norm ** 2)

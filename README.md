@@ -1,8 +1,8 @@
-# Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models
+# Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models (NeurIPS2024)
 
 Official PyTorch implementation of the method **OLIVINE**. More details can be found in the paper:
 
-**Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models**, under review. [[arXiv](https://arxiv.org/abs/2405.14271)]
+**Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models**, NeurIPS2024 [[arXiv](https://arxiv.org/abs/2405.14271)] by Yifan Zhang and Junhui Hou.
 
 ![Overview of the method](./assets/method.png)
 
@@ -31,10 +31,11 @@ datasets/
     ├── dataset
         ├── poses
         └── sequences
+└── other datasets...
 ```
 
-## Pre-trained models
-Minkowski SR-UNet pre-trained on nuScenes: [Link](https://drive.google.com/file/d/1gMzwFymKkSi5WqeEL8Ie9L8N6qTcli2u/view?usp=sharing).
+<!-- ## Pre-trained models
+Minkowski SR-UNet pre-trained on nuScenes: [Link](https://drive.google.com/file/d/1gMzwFymKkSi5WqeEL8Ie9L8N6qTcli2u/view?usp=sharing). -->
 
 <!--
 ### SPconv VoxelNet
@@ -45,15 +46,21 @@ Minkowski SR-UNet pre-trained on nuScenes: [Link](https://drive.google.com/file/
 ## Reproducing the results
 
 ### Predict the weak semantic labels (required)
-
-<!-- Before launching the pre-training, you first need to compute all superpixels on nuScenes, this can take several hours. You can either compute superpixels for the Minkowski SR-UNet (minkunet) or the voxelnet backbones. The first is adapted for semantic segmentation and the second for object detection. -->
-First we use the [Grounded-SAM](https://github.com/IDEA-Research/Grounded-Segment-Anything) to obtain weak semantic labels of RGB images. To initialize the submodle:
+<!-- First we use the [Grounded-SAM](https://github.com/IDEA-Research/Grounded-Segment-Anything) to obtain weak semantic labels of RGB images. To initialize the submodle:
 
 ``` git submodule update --init ``` 
 
 Then, the script for the prediction can be found in **Grounded-SAM/infer.sh**. Please install Grounded-SAM following the instructions (see **Grounded-SAM/README.md**) before running the script.
 
-You can also obtain the labels by directly downloading the files we provide in [Baidu netdisk](https://pan.baidu.com/s/1CNQRCawQuL5eNFQqTXMwlw?pwd=1jkr) or [Google Drive](https://drive.google.com/file/d/1FGow9PFoH11M-g_eUg-7ZGZdT_8pUt4j/view?usp=drive_link).
+You can also obtain the labels by directly downloading the files we provide in [Baidu netdisk](https://pan.baidu.com/s/1CNQRCawQuL5eNFQqTXMwlw?pwd=1jkr) or [Google Drive](https://drive.google.com/file/d/1FGow9PFoH11M-g_eUg-7ZGZdT_8pUt4j/view?usp=drive_link). -->
+
+First we use the SEEM to obtain weak semantic labels of RGB images. If you do not want to execute the following steps by yourself, you can also obtain the labels by directly downloading the files we provide in [Baidu netdisk](https://pan.baidu.com/s/1QI6_3k30NS945pbbSHQr2Q?pwd=zed9) or [Google Drive](https://drive.google.com/file/d/1FGow9PFoH11M-g_eUg-7ZGZdT_8pUt4j/view?usp=drive_link).
+
+1. Install necessary libraries in demo_code/requirements.txt
+2. Link nuScenes dataset to demo_code/data/sets. Command: ln -s datasets/nuscenes/
+3. Run the script ``` bash semantic_label_generation.sh ```
+4. Organize the generated files and put them in data/nuscenes/camseg.
+
 
 ### Pre-training a 3D backbone
 
@@ -99,7 +106,7 @@ Random init.                                     |8.1                       |30.
 [DepthContrast](https://arxiv.org/abs/2101.02691)|22.1                      |31.7                                 |41.5
 [PPKT](https://arxiv.org/abs/2104.04687)         |36.4                      |37.8                                 |43.9
 [SLidR](https://arxiv.org/abs/2203.16258)                                            |38.8                  |38.3                             |44.6
-OLIVINE                                            |**47.3**                  |**46.1**                             |**47.3**
+OLIVINE                                            |**50.0**                  |**50.5**                             |**49.3**
 
 ### Semantic Segmentation on nuScenes
 
@@ -108,7 +115,7 @@ Method          |1%      |5%      |10%     |25%     |100%
 ---             |:-:     |:-:     |:-:     |:-:     |:-:
 Random init.    |30.3    |47.7    |56.6    |64.8    |74.2
 SLidR           |  39.0  |  52.2  |  58.8  |  66.2  |  74.6  
-OLIVINE           |**46.1**|**57.5**|**63.0**|**69.3**|**76.1**
+OLIVINE           |**50.6**|**60.2**|**65.0**|**70.1**|**76.5**
 
 ### Object detection on KITTI
 
@@ -162,10 +169,10 @@ OLIVINE is released under the [Apache 2.0 license](./LICENSE).
 ## Citation
 If you use OLIVINE useful in your research, please consider citing:
 ```
-@article{zhang2024fine,
-    title={Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models},
-    author={Zhang, Yifan and Hou, Junhui},
-    journal={arXiv preprint arXiv:2405.14271},
-    year={2024}
+@inproceedings{zhang2024fine,
+  title={Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models},
+  author={Zhang, Yifan and Hou, Junhui},
+  booktitle={Advances in Neural Information Processing Systems},
+  year={2024}
 }
 ```

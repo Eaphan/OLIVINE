@@ -4,8 +4,13 @@ import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from utils.transforms import make_transforms_clouds
 from downstream.dataloader_kitti import SemanticKITTIDataset
+from downstream.dataloader_scribble_kitti import ScribbleKITTIDataset
+from downstream.dataloader_rellis3d import Rellis3DDataset
+# from downstream.dataloader_semanticposs import SemanticPOSSDataset
 from downstream.dataloader_nuscenes import NuScenesDataset, custom_collate_fn
-
+from downstream.dataloader_semanticstf import SemanticSTFDataset
+# from downstream.dataloader_synlidar import SynLiDARDataset
+from downstream.dataloader_daps3d import DAPS3DDataset
 
 class DownstreamDataModule(pl.LightningDataModule):
     """
@@ -27,6 +32,18 @@ class DownstreamDataModule(pl.LightningDataModule):
             Dataset = NuScenesDataset
         elif self.config["dataset"].lower() in ("kitti", "semantickitti"):
             Dataset = SemanticKITTIDataset
+        elif self.config["dataset"].lower() in ("scribblekitti", "scribble_kitti"):
+            Dataset = ScribbleKITTIDataset
+        elif self.config["dataset"].lower() == "rellis3d":
+            Dataset = Rellis3DDataset            
+        # elif self.config["dataset"].lower() in ("semanticposs", "semantic_poss"):
+        #     Dataset = SemanticPOSSDataset
+        elif self.config["dataset"].lower() in ("semanticstf", "semantic_stf"):
+            Dataset = SemanticSTFDataset        
+        # elif self.config["dataset"].lower() in ("synlidar"):
+        #     Dataset = SynLiDARDataset
+        elif self.config["dataset"].lower() in ("daps3d"):
+            Dataset = DAPS3DDataset   
         else:
             raise Exception(f"Unknown dataset {self.config['dataset']}")
         if self.config["training"] in ("parametrize", "parametrizing"):

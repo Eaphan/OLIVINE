@@ -56,7 +56,7 @@ def custom_collate_fn(list_data):
         }
 
 
-class SemanticKITTIDataset(Dataset):
+class ScribbleKITTIDataset(Dataset):
     """
     Dataset returning a lidar scene and associated labels.
     Note that superpixels fonctionality have been removed.
@@ -88,21 +88,22 @@ class SemanticKITTIDataset(Dataset):
 
         self.list_files = []
         for num in phase_set:
+            print('###', num)
             directory = next(
                 os.walk(
-                    f"datasets/semantic_kitti/dataset/sequences/{num:0>2d}/velodyne"
+                    f"datasets/scribble_kitti/dataset/sequences/{num:0>2d}/velodyne"
                 )
             )
             self.list_files.extend(
                 map(
-                    lambda x: f"datasets/semantic_kitti/dataset/sequences/"
+                    lambda x: f"datasets/scribble_kitti/dataset/sequences/"
                     f"{num:0>2d}/velodyne/" + x,
                     directory[2],
                 )
             )
         self.list_files = sorted(self.list_files)[::skip_ratio]
-        # if phase in ("val", "verifying"):
-        #     self.list_files = self.list_files[::10]
+        if phase in ("val", "verifying"):
+            self.list_files = self.list_files[::10]
 
         # labels' names lookup table
         self.eval_labels = {
@@ -122,7 +123,7 @@ class SemanticKITTIDataset(Dataset):
         pc = points[:, :3]
         if self.labels:
             lidarseg_labels_filename = re.sub(
-                "bin", "label", re.sub("velodyne", "labels", lidar_file)
+                "bin", "label", re.sub("velodyne", "scribbles", lidar_file)
             )
             points_labels = (
                 np.fromfile(lidarseg_labels_filename, dtype=np.uint32) & 0xFFFF
@@ -182,7 +183,7 @@ def make_data_loader(config, phase, num_threads=0):
         transforms = None
 
     # instantiate the dataset
-    dset = SemanticKITTIDataset(phase=phase, transforms=transforms, config=config)
+    dset = ScribbleKITTIDataset(phase=phase, transforms=transforms, config=config)
     collate_fn = custom_collate_fn
     batch_size = config["batch_size"] // config["num_gpus"]
 
