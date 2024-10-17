@@ -57,8 +57,8 @@ You can also obtain the labels by directly downloading the files we provide in [
 First we use the SEEM to obtain weak semantic labels of RGB images. If you do not want to execute the following steps by yourself, you can also obtain the labels by directly downloading the files we provide in [Baidu netdisk](https://pan.baidu.com/s/1QI6_3k30NS945pbbSHQr2Q?pwd=zed9) or [Google Drive](https://drive.google.com/file/d/1FGow9PFoH11M-g_eUg-7ZGZdT_8pUt4j/view?usp=drive_link).
 
 1. Install necessary libraries in demo_code/requirements.txt
-2. Link nuScenes dataset to demo_code/data/sets. Command: ln -s datasets/nuscenes/
-3. Run the script ``` bash semantic_label_generation.sh ```
+2. Link nuScenes dataset to demo_code/data/sets. Command: ln -s datasets/nuscenes demo_code/data/sets/
+3. Go to demo_code directory and run the script ``` bash semantic_label_generation.sh ```
 4. Organize the generated files and put them in data/nuscenes/camseg.
 
 
