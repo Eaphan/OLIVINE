@@ -4,8 +4,8 @@ Official PyTorch implementation of the method **OLIVINE**. More details can be f
 
 **Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models**, NeurIPS2024 [[arXiv](https://arxiv.org/abs/2405.14271)] by Yifan Zhang and Junhui Hou.
 
-![Overview of the method](./assets/method.png)
-
+<!-- ![Overview of the method](./assets/method.png) -->
+![Poster](./assets/poster.png)
 
 ## Dependencies
 
@@ -167,7 +167,7 @@ Computation of the lovasz loss used in semantic segmentation follows the code of
 OLIVINE is released under the [Apache 2.0 license](./LICENSE).
 
 ## Citation
-If you use OLIVINE useful in your research, please consider citing:
+If you find OLIVINE useful in your research, please consider citing:
 ```
 @inproceedings{zhang2024fine,
   title={Fine-grained Image-to-LiDAR Contrastive Distillation with Visual Foundation Models},
